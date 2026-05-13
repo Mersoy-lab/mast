@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mast — Tie yourself to the mast.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Instrument+Serif&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --obsidian: #0a0a0c;
+    --graphite: #131318;
+    --graphite-soft: #1c1c22;
+    --line: rgba(255,255,255,0.08);
+    --line-strong: rgba(255,255,255,0.14);
+    --white: #f4f4f6;
+    --mute: #9a9aa3;
+    --mute-soft: #6b6b74;
+    --crimson: #b04244;
+    --crimson-glow: rgba(176, 66, 68, 0.18);
+    --blue: #6aa9ff;
+    --blue-soft: rgba(106, 169, 255, 0.12);
+    --gold: #c9a96a;
+    --serif: 'Instrument Serif', 'Times New Roman', serif;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--obsidian);
+    color: var(--white);
+    font-family: var(--sans);
+    font-weight: 300;
+    line-height: 1.6;
+    letter-spacing: -0.005em;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Ambient noise texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.5;
+  }
+
+  .container {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 32px;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    padding: 22px 0;
+    background: rgba(10, 10, 12, 0.65);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .logo {
+    font-family: var(--serif);
+    font-size: 22px;
+    letter-spacing: 0.02em;
+    color: var(--white);
+    text-decoration: none;
+    font-weight: 400;
+  }
+  .logo::before {
+    content: '—';
+    color: var(--crimson);
+    margin-right: 8px;
+    opacity: 0.7;
+  }
+  .nav-links {
+    display: flex;
+    gap: 36px;
+    align-items: center;
+    font-size: 13.5px;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+  }
+  .nav-links a {
+    color: var(--mute);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  .nav-links a:hover { color: var(--white); }
+  .nav-cta {
+    background: var(--white);
+    color: var(--obsidian);
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-weight: 500;
+    transition: transform 0.2s ease, background 0.2s ease;
+  }
+  .nav-cta:hover {
+    background: var(--white) !important;
+    transform: translateY(-1px);
+  }
+  @media (max-width: 720px) {
+    .nav-links a:not(.nav-cta) { display: none; }
+  }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 140px 0 100px;
+    position: relative;
+  }
+  .hero-eyebrow {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--mute);
+    margin-bottom: 36px;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 500;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    width: 30px;
+    height: 1px;
+    background: var(--mute-soft);
+  }
+  .hero h1 {
+    font-family: var(--serif);
+    font-size: clamp(56px, 9vw, 128px);
+    line-height: 0.95;
+    letter-spacing: -0.025em;
+    margin-bottom: 36px;
+    font-weight: 400;
+  }
+  .hero h1 .accent {
+    font-style: italic;
+    color: var(--white);
+    position: relative;
+  }
+  .hero h1 .accent::after {
+    content: '';
+    position: absolute;
+    bottom: 0.12em;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--crimson);
+    opacity: 0.6;
+  }
+  .hero-sub {
+    font-size: clamp(17px, 1.6vw, 21px);
+    color: var(--mute);
+    max-width: 640px;
+    margin-bottom: 56px;
+    line-height: 1.55;
+    font-weight: 300;
+  }
+  .hero-cta-row {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .btn-primary {
+    background: var(--white);
+    color: var(--obsidian);
+    padding: 17px 32px;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 14.5px;
+    letter-spacing: 0.01em;
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+    border: 1px solid transparent;
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 50px -10px rgba(255,255,255,0.18);
+  }
+  .btn-ghost {
+    color: var(--white);
+    padding: 17px 4px;
+    text-decoration: none;
+    font-weight: 400;
+    font-size: 14.5px;
+    letter-spacing: 0.01em;
+    border-bottom: 1px solid var(--line-strong);
+    transition: border-color 0.2s ease;
+  }
+  .btn-ghost:hover { border-color: var(--white); }
+  .btn-ghost::after {
+    content: ' →';
+    color: var(--mute);
+    transition: color 0.2s ease, margin 0.2s ease;
+  }
+  .btn-ghost:hover::after { color: var(--white); margin-left: 4px; }
+
+  /* hero whisper line */
+  .hero-whisper {
+    position: absolute;
+    bottom: 60px;
+    left: 32px;
+    right: 32px;
+    font-size: 12px;
+    color: var(--mute-soft);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+    max-width: 1116px;
+    margin: 0 auto;
+    font-weight: 500;
+  }
+  .hero-whisper span:last-child { font-style: italic; text-transform: none; letter-spacing: 0.02em; color: var(--mute); }
+
+  /* SECTION shared */
+  section.story { padding: 140px 0; border-top: 1px solid var(--line); position: relative; }
+  .eyebrow {
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.24em;
+    color: var(--crimson);
+    margin-bottom: 28px;
+    font-weight: 600;
+  }
+  .eyebrow.blue { color: var(--blue); }
+  .eyebrow.mute { color: var(--mute); }
+  h2 {
+    font-family: var(--serif);
+    font-size: clamp(38px, 5vw, 64px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    font-weight: 400;
+    margin-bottom: 28px;
+    max-width: 880px;
+  }
+  h2 em { color: var(--mute); font-style: italic; }
+  .lede {
+    font-size: clamp(17px, 1.4vw, 19px);
+    color: var(--mute);
+    max-width: 640px;
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  /* PROBLEM grid */
+  .problem-grid {
+    margin-top: 80px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    border-top: 1px solid var(--line);
+  }
+  .problem-cell {
+    padding: 36px 28px 36px 0;
+    border-bottom: 1px solid var(--line);
+    border-right: 1px solid var(--line);
+  }
+  .problem-cell:last-child { border-right: none; }
+  .problem-num {
+    font-family: var(--serif);
+    font-size: 14px;
+    color: var(--crimson);
+    margin-bottom: 14px;
+    letter-spacing: 0.06em;
+  }
+  .problem-cell p {
+    font-size: 15.5px;
+    line-height: 1.5;
+    color: var(--white);
+    font-weight: 300;
+  }
+  @media (max-width: 760px) {
+    .problem-cell { border-right: none; padding-right: 0; }
+  }
+
+  /* LOOP */
+  .loop-wrap {
+    margin-top: 80px;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0;
+    position: relative;
+  }
+  .loop-step {
+    padding: 32px 22px 32px 0;
+    position: relative;
+    border-top: 1px solid var(--line);
+  }
+  .loop-step::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 0;
+    width: 32px;
+    height: 1px;
+    background: var(--blue);
+  }
+  .loop-step:nth-child(6)::before { background: var(--gold); }
+  .loop-n {
+    font-family: var(--serif);
+    font-size: 12.5px;
+    color: var(--mute-soft);
+    letter-spacing: 0.1em;
+    margin-bottom: 18px;
+    font-style: italic;
+  }
+  .loop-title {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 10px;
+    letter-spacing: -0.005em;
+  }
+  .loop-desc {
+    font-size: 13.5px;
+    color: var(--mute);
+    line-height: 1.55;
+  }
+  @media (max-width: 980px) {
+    .loop-wrap { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 540px) {
+    .loop-wrap { grid-template-columns: 1fr; }
+  }
+
+  /* FEATURES — main stage */
+  .feature-block {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 100px;
+    align-items: center;
+    padding: 110px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .feature-block:last-child { border-bottom: none; }
+  .feature-block.reverse { direction: rtl; }
+  .feature-block.reverse > * { direction: ltr; }
+  .feature-tag {
+    font-family: var(--serif);
+    font-size: 13px;
+    color: var(--crimson);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    margin-bottom: 20px;
+    font-style: italic;
+  }
+  .feature-tag.blue { color: var(--blue); }
+  .feature-tag.gold { color: var(--gold); }
+  .feature-block h3 {
+    font-family: var(--serif);
+    font-size: clamp(32px, 3.4vw, 46px);
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    margin-bottom: 24px;
+    font-weight: 400;
+  }
+  .feature-block p {
+    font-size: 16.5px;
+    color: var(--mute);
+    line-height: 1.65;
+    margin-bottom: 18px;
+    font-weight: 300;
+  }
+  .feature-block p strong {
+    color: var(--white);
+    font-weight: 400;
+  }
+  @media (max-width: 900px) {
+    .feature-block { grid-template-columns: 1fr; gap: 40px; padding: 70px 0; }
+    .feature-block.reverse { direction: ltr; }
+  }
+
+  /* MOCK PANELS */
+  .panel {
+    background: linear-gradient(180deg, var(--graphite) 0%, var(--obsidian) 100%);
+    border: 1px solid var(--line-strong);
+    border-radius: 18px;
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .panel-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 24px;
+  }
+  .panel-head-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--mute);
+    font-weight: 500;
+  }
+  .panel-head-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--crimson);
+    box-shadow: 0 0 12px var(--crimson);
+  }
+  .panel-head-dot.blue { background: var(--blue); box-shadow: 0 0 12px var(--blue); }
+  .panel-head-dot.gold { background: var(--gold); box-shadow: 0 0 12px var(--gold); }
+
+  /* Contract mock */
+  .contract-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+  }
+  .contract-row:last-child { border-bottom: none; }
+  .contract-row .k { color: var(--mute); font-weight: 400; }
+  .contract-row .v { color: var(--white); font-weight: 400; text-align: right; max-width: 60%; }
+  .contract-row .v.crimson { color: var(--crimson); }
+  .contract-title {
+    font-family: var(--serif);
+    font-size: 24px;
+    margin-bottom: 4px;
+    line-height: 1.2;
+  }
+  .contract-meta {
+    font-size: 12px;
+    color: var(--mute-soft);
+    letter-spacing: 0.04em;
+    margin-bottom: 18px;
+  }
+  .stake-bar {
+    margin-top: 22px;
+    padding: 16px;
+    background: var(--crimson-glow);
+    border: 1px solid rgba(176, 66, 68, 0.3);
+    border-radius: 10px;
+    font-size: 13px;
+    color: #e8b4b5;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .stake-bar strong { color: #f4d4d5; font-weight: 500; }
+
+  /* Future Self panel */
+  .future-text {
+    font-family: var(--serif);
+    font-size: 19px;
+    line-height: 1.55;
+    color: var(--white);
+    font-style: italic;
+    letter-spacing: -0.005em;
+  }
+  .future-text p { margin-bottom: 14px; }
+  .future-text p:last-child { margin-bottom: 0; }
+  .future-toggle {
+    display: flex;
+    gap: 0;
+    margin-bottom: 26px;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    padding: 4px;
+    width: fit-content;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 500;
+  }
+  .future-toggle .t {
+    padding: 8px 16px;
+    border-radius: 999px;
+    color: var(--mute);
+    cursor: default;
+  }
+  .future-toggle .t.active.success { background: var(--blue-soft); color: var(--blue); }
+  .future-toggle .t.active.failure { background: var(--crimson-glow); color: #e8b4b5; }
+
+  /* Self-trust score */
+  .trust-score {
+    font-family: var(--serif);
+    font-size: 96px;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    margin-bottom: 6px;
+    color: var(--white);
+  }
+  .trust-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--mute);
+    margin-bottom: 28px;
+  }
+  .trust-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-top: 1px solid var(--line);
+    font-size: 13.5px;
+  }
+  .trust-row .k { color: var(--mute); }
+  .trust-row .v { color: var(--white); font-variant-numeric: tabular-nums; }
+  .trust-bar {
+    height: 4px;
+    background: var(--graphite-soft);
+    border-radius: 2px;
+    overflow: hidden;
+    margin: 18px 0 26px;
+  }
+  .trust-bar-fill {
+    height: 100%;
+    width: 68%;
+    background: linear-gradient(90deg, var(--crimson) 0%, var(--gold) 60%, var(--blue) 100%);
+    border-radius: 2px;
+  }
+
+  /* Sirens grid */
+  .sirens-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .siren-cell {
+    background: var(--graphite);
+    padding: 18px 20px;
+    font-size: 13.5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .siren-cell .name { color: var(--white); font-weight: 400; }
+  .siren-cell .risk { font-size: 11px; color: var(--crimson); letter-spacing: 0.1em; text-transform: uppercase; }
+  .siren-cell .risk.low { color: var(--mute); }
+  .siren-cell .risk.med { color: var(--gold); }
+
+  /* PULL QUOTE */
+  .pullquote {
+    padding: 160px 0;
+    border-top: 1px solid var(--line);
+    text-align: center;
+  }
+  .pullquote blockquote {
+    font-family: var(--serif);
+    font-size: clamp(34px, 4.4vw, 58px);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    max-width: 900px;
+    margin: 0 auto;
+    font-weight: 400;
+  }
+  .pullquote blockquote em { color: var(--crimson); font-style: italic; }
+  .pullquote .attrib {
+    margin-top: 36px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--mute);
+    font-weight: 500;
+  }
+
+  /* FINAL CTA */
+  .final-cta {
+    padding: 180px 0 140px;
+    text-align: center;
+    border-top: 1px solid var(--line);
+    background: radial-gradient(ellipse at center top, rgba(176, 66, 68, 0.08) 0%, transparent 60%);
+  }
+  .final-cta h2 {
+    margin: 0 auto 28px;
+    text-align: center;
+    font-size: clamp(48px, 7vw, 96px);
+    line-height: 1;
+  }
+  .final-cta .lede {
+    margin: 0 auto 60px;
+    text-align: center;
+    font-size: 19px;
+  }
+  .final-cta .hero-cta-row { justify-content: center; }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 60px 0 80px;
+    font-size: 13px;
+    color: var(--mute-soft);
+  }
+  .foot-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr 1fr;
+    gap: 60px;
+    margin-bottom: 80px;
+  }
+  .foot-col h4 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--white);
+    margin-bottom: 22px;
+    font-weight: 500;
+  }
+  .foot-col a {
+    display: block;
+    color: var(--mute);
+    text-decoration: none;
+    padding: 6px 0;
+    transition: color 0.2s ease;
+  }
+  .foot-col a:hover { color: var(--white); }
+  .foot-intro {
+    font-family: var(--serif);
+    font-size: 22px;
+    color: var(--white);
+    line-height: 1.3;
+    max-width: 320px;
+  }
+  .foot-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 30px;
+    border-top: 1px solid var(--line);
+    font-size: 12px;
+  }
+  @media (max-width: 800px) {
+    .foot-grid { grid-template-columns: 1fr 1fr; gap: 40px; }
+    .foot-intro { font-size: 18px; }
+  }
+
+  /* SUBTLE ENTRANCE */
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .rise { animation: rise 1.2s ease forwards; }
+  .rise-1 { animation-delay: 0.1s; opacity: 0; }
+  .rise-2 { animation-delay: 0.3s; opacity: 0; }
+  .rise-3 { animation-delay: 0.5s; opacity: 0; }
+  .rise-4 { animation-delay: 0.7s; opacity: 0; }
+
+  /* Decorative rope motif — vertical tether line */
+  .tether {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(180deg, transparent 0%, var(--crimson) 12%, var(--crimson) 88%, transparent 100%);
+    opacity: 0.15;
+    pointer-events: none;
+  }
+  .tether.left { left: 12%; }
+  .tether.right { right: 12%; }
+  @media (max-width: 1100px) { .tether { display: none; } }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="container nav-inner">
+    <a href="#" class="logo">Mast</a>
+    <div class="nav-links">
+      <a href="#how">How it works</a>
+      <a href="#features">The system</a>
+      <a href="#future">Future self</a>
+      <a href="#" class="nav-cta">Create your pact</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="tether left"></div>
+  <div class="tether right"></div>
+  <div class="container">
+    <div class="hero-eyebrow rise rise-1">A future-self operating system</div>
+    <h1 class="rise rise-2">Tie yourself<br/>to the <span class="accent">mast.</span></h1>
+    <p class="hero-sub rise rise-3">
+      Odysseus knew willpower would fail when temptation arrived. So he built a system stronger than impulse.
+      Mast brings that ancient strategy into the modern world — commitment contracts, future-self immersion,
+      and consequence architecture for the person you said you'd become.
+    </p>
+    <div class="hero-cta-row rise rise-4">
+      <a href="#" class="btn-primary">Create your pact</a>
+      <a href="#how" class="btn-ghost">See how it works</a>
+    </div>
+  </div>
+  <div class="hero-whisper">
+    <span>Est. for those who keep their word</span>
+    <span>"Stop betraying your future self."</span>
+  </div>
+</header>
+
+<!-- PROBLEM -->
+<section class="story" id="problem">
+  <div class="container">
+    <div class="eyebrow">The diagnosis</div>
+    <h2>You don't fail because you're lazy. <em>You fail because the system is rigged against your future self.</em></h2>
+    <p class="lede">Present emotions outweigh long-term intentions. Future consequences feel emotionally distant. Motivation fluctuates. Identity fragments. And after enough broken promises, you stop believing yourself.</p>
+
+    <div class="problem-grid">
+      <div class="problem-cell">
+        <div class="problem-num">01</div>
+        <p>Present feeling beats future thinking. Every time.</p>
+      </div>
+      <div class="problem-cell">
+        <div class="problem-num">02</div>
+        <p>Tomorrow's reward feels abstract. Today's comfort feels real.</p>
+      </div>
+      <div class="problem-cell">
+        <div class="problem-num">03</div>
+        <p>Motivation is a mood, not a strategy.</p>
+      </div>
+      <div class="problem-cell">
+        <div class="problem-num">04</div>
+        <p>Identity splits between who you are and who you said you'd be.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- THE LOOP -->
+<section class="story" id="how">
+  <div class="container">
+    <div class="eyebrow blue">The emotional loop</div>
+    <h2>One transformation. <em>Repeated until it becomes you.</em></h2>
+    <p class="lede">Habit trackers count days. Mast rebuilds the relationship between who you are and who you said you'd be. Six movements. One identity.</p>
+
+    <div class="loop-wrap">
+      <div class="loop-step">
+        <div class="loop-n">i.</div>
+        <div class="loop-title">Make a promise</div>
+        <div class="loop-desc">Define a commitment that actually matters to you.</div>
+      </div>
+      <div class="loop-step">
+        <div class="loop-n">ii.</div>
+        <div class="loop-title">Bind the future self</div>
+        <div class="loop-desc">Create consequences and accountability stronger than emotion.</div>
+      </div>
+      <div class="loop-step">
+        <div class="loop-n">iii.</div>
+        <div class="loop-title">Visualize the future</div>
+        <div class="loop-desc">Step into the life today's choices are quietly building.</div>
+      </div>
+      <div class="loop-step">
+        <div class="loop-n">iv.</div>
+        <div class="loop-title">Take action</div>
+        <div class="loop-desc">Follow through — even when nothing inside you wants to.</div>
+      </div>
+      <div class="loop-step">
+        <div class="loop-n">v.</div>
+        <div class="loop-title">Rebuild self-trust</div>
+        <div class="loop-desc">Believe your own word again. The slowest, deepest reward.</div>
+      </div>
+      <div class="loop-step">
+        <div class="loop-n">vi.</div>
+        <div class="loop-title">Identity evolves</div>
+        <div class="loop-desc">Discipline stops being effort. It becomes who you are.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURE 1: THE MAST — Commitment Contracts -->
+<section class="story" id="features">
+  <div class="container">
+    <div class="feature-block">
+      <div>
+        <div class="feature-tag">i. The Mast</div>
+        <h3>Bind yourself to a system stronger than impulse.</h3>
+        <p>Every commitment becomes a contract — goal, timeline, witness, stake, and the version of you that wrote it. You're not setting a goal. You're <strong>making a pact with your future self</strong>, with consequences strong enough to outlast the mood that would betray it.</p>
+        <p>Wake at six. Quit nicotine. Train five times a week. Stop scrolling at 9pm. Whatever it is — bind it before the storm.</p>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-head-label">Commitment Contract — Active</span>
+          <span class="panel-head-dot"></span>
+        </div>
+        <div class="contract-title">No screens after 9pm</div>
+        <div class="contract-meta">Day 14 of 60 · Witness: Sara · Verified nightly</div>
+        <div class="contract-row"><span class="k">Goal</span><span class="v">Be present with my kids</span></div>
+        <div class="contract-row"><span class="k">Verification</span><span class="v">Phone in lockbox · photo</span></div>
+        <div class="contract-row"><span class="k">Witness</span><span class="v">Sara (spouse)</span></div>
+        <div class="contract-row"><span class="k">Stake</span><span class="v crimson">$50 per breach</span></div>
+        <div class="stake-bar">
+          <span>If broken, funds redirect to <strong>your anti-charity</strong></span>
+          <span>→</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- FEATURE 2: ANTI-CHARITY -->
+    <div class="feature-block reverse">
+      <div>
+        <div class="feature-tag">ii. The Anti-Charity</div>
+        <h3>Make failure cost something real.</h3>
+        <p>If you break the contract, your money doesn't go to a cause you love. It goes to one you can't stand. Loss aversion is one of the strongest forces in human behavior — Mast points it at your future, not against it.</p>
+        <p><strong>Calibrated, not cruel.</strong> Ethical safeguards. Balanced political neutrality. No targeting of vulnerable groups. The point is friction strong enough to interrupt the impulse — not punishment for its own sake.</p>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-head-label">Consequence Architecture</span>
+          <span class="panel-head-dot"></span>
+        </div>
+        <div style="font-family: var(--serif); font-size: 17px; color: var(--mute); margin-bottom: 22px; font-style: italic;">If I break this contract, $50 goes to —</div>
+        <div class="contract-row"><span class="k">A cause I oppose</span><span class="v crimson">Selected</span></div>
+        <div class="contract-row"><span class="k">A rival team's foundation</span><span class="v">—</span></div>
+        <div class="contract-row"><span class="k">A custom anti-target</span><span class="v">—</span></div>
+        <div class="contract-row"><span class="k">A friend who will mock me</span><span class="v">—</span></div>
+        <div class="stake-bar" style="margin-top: 26px;">
+          <span><strong>Emotional intensity</strong> — calibrated to your psychology</span>
+          <span style="font-family: var(--serif); font-size: 18px; color: #f4d4d5;">7/10</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- FEATURE 3: FUTURE SELF -->
+    <div class="feature-block" id="future">
+      <div>
+        <div class="feature-tag blue">iii. Future-Self Immersion</div>
+        <h3>Meet the person today's choices are building.</h3>
+        <p>The reason you betray your future self is that you can't feel them. They're abstract. Distant. Forgettable. Mast generates emotionally precise simulations of who you become — and who you don't — based on the pattern you're actually running.</p>
+        <p>Not fantasy. Not cheesy self-help. Grounded, cinematic, deeply personal. You don't have to imagine the future you. You can stand inside it.</p>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-head-label">Future Self · 12 months from today</span>
+          <span class="panel-head-dot blue"></span>
+        </div>
+        <div class="future-toggle">
+          <span class="t active success">Success path</span>
+          <span class="t">Drift path</span>
+        </div>
+        <div class="future-text">
+          <p>"You wake before the alarm now. Your mornings are quieter.</p>
+          <p>You no longer negotiate with yourself in bed. The anxiety that used to follow unfinished goals has weakened.</p>
+          <p>People trust your word more — because you stopped making promises you abandon. You feel calmer. Your actions finally match your intentions."</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- FEATURE 4: SELF-TRUST SCORE -->
+    <div class="feature-block reverse">
+      <div>
+        <div class="feature-tag gold">iv. The Self-Trust Score</div>
+        <h3>The only metric that compounds.</h3>
+        <p>Habit apps measure streaks. Mast measures <strong>integrity</strong> — promises made, promises kept, recovery speed, follow-through under friction. The score rebuilds the most important relationship you'll ever have: the one where you believe yourself.</p>
+        <p>Lose it slowly. Earn it back deliberately. There is no other moat in your life that matters more.</p>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-head-label">Self-Trust Score</span>
+          <span class="panel-head-dot gold"></span>
+        </div>
+        <div class="trust-score">682</div>
+        <div class="trust-label">Up 41 points · last 30 days</div>
+        <div class="trust-bar"><div class="trust-bar-fill"></div></div>
+        <div class="trust-row"><span class="k">Promises made</span><span class="v">42</span></div>
+        <div class="trust-row"><span class="k">Promises kept</span><span class="v">31</span></div>
+        <div class="trust-row"><span class="k">Recovery speed (avg)</span><span class="v">1.4 days</span></div>
+        <div class="trust-row"><span class="k">Identity alignment</span><span class="v">74%</span></div>
+      </div>
+    </div>
+
+    <!-- FEATURE 5: SIRENS -->
+    <div class="feature-block">
+      <div>
+        <div class="feature-tag">v. The Sirens</div>
+        <h3>Name the temptations before they name you.</h3>
+        <p>Doomscrolling. Late-night spending. The third drink. The avoided conversation. Mast asks you to map your Sirens before they sing — and prepares the response in advance, while your judgment is still yours.</p>
+        <p>You don't fight temptation in the moment. <strong>You prepare for it before it arrives.</strong> Like Odysseus did. That's the whole game.</p>
+      </div>
+      <div>
+        <div class="sirens-grid">
+          <div class="siren-cell"><span class="name">Doomscrolling</span><span class="risk">High</span></div>
+          <div class="siren-cell"><span class="name">Late-night ordering</span><span class="risk med">Med</span></div>
+          <div class="siren-cell"><span class="name">Avoidance scrolling</span><span class="risk">High</span></div>
+          <div class="siren-cell"><span class="name">Skipping the gym</span><span class="risk med">Med</span></div>
+          <div class="siren-cell"><span class="name">Emotional eating</span><span class="risk med">Med</span></div>
+          <div class="siren-cell"><span class="name">One-more-episode</span><span class="risk low">Low</span></div>
+        </div>
+        <div style="font-size: 13px; color: var(--mute); margin-top: 24px; font-style: italic; font-family: var(--serif);">"Anticipated before they arrived."</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PULL QUOTE -->
+<section class="pullquote">
+  <div class="container">
+    <blockquote>
+      Most people don't suffer because they're undisciplined.<br/>
+      They suffer because <em>they stopped believing themselves.</em>
+    </blockquote>
+    <div class="attrib">— Mast operating principle</div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta">
+  <div class="container">
+    <div class="eyebrow mute">Begin</div>
+    <h2>Stop betraying your future self.</h2>
+    <p class="lede">Three minutes. One promise. One witness. One stake. The system starts the moment you sign it.</p>
+    <div class="hero-cta-row">
+      <a href="#" class="btn-primary">Create your pact</a>
+      <a href="#" class="btn-ghost">Read the operating principles</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="foot-grid">
+      <div class="foot-col">
+        <a href="#" class="logo" style="margin-bottom: 20px; display: inline-block;">Mast</a>
+        <div class="foot-intro">A commitment system for becoming who you said you'd be.</div>
+      </div>
+      <div class="foot-col">
+        <h4>Product</h4>
+        <a href="#">Commitment contracts</a>
+        <a href="#">Future-self engine</a>
+        <a href="#">Self-trust score</a>
+        <a href="#">Anti-charity system</a>
+      </div>
+      <div class="foot-col">
+        <h4>Library</h4>
+        <a href="#">Operating principles</a>
+        <a href="#">The Odyssey method</a>
+        <a href="#">Behavioral science</a>
+        <a href="#">Research</a>
+      </div>
+      <div class="foot-col">
+        <h4>Company</h4>
+        <a href="#">About</a>
+        <a href="#">Ethics & safeguards</a>
+        <a href="#">Contact</a>
+        <a href="#">Sign in</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 Mast. Built for those who keep their word.</span>
+      <span style="font-style: italic; color: var(--mute);">"Tie yourself to the mast."</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
